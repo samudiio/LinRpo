@@ -47,6 +47,7 @@ void Lin_Init (uint32_t LinBaudrate)
      if(IDLE == gs_Lin_stateMachine)
      {
          if((gs_Lin_ByteCounter == FIRST_BREAK_BYTE) && (TxBuffRdy)){
+             gs_Lin_stateMachine = SEND_BREAK;
              UART_PutChar(UART4, 0x00);
              UART_UpdateBaudRate(BAUDRATE_UPD);
              gs_Lin_ByteCounter = SECOND_BREAK_BYTE;
@@ -54,7 +55,6 @@ void Lin_Init (uint32_t LinBaudrate)
          else{
             /*Do Nothing*/
          }
-         gs_Lin_stateMachine = SEND_BREAK;
      }
      else{
          /*Do Nothing*/
