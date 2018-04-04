@@ -11,9 +11,14 @@
 #include "lin.h"
 
 /*------------------------------------------------------------------------------
- *         Local Variables
+ *          Variables
  *----------------------------------------------------------------------------*/
 
+ static uint8_t ls_Lin_stateMachine;
+ static uint8_t ls_Lin_ByteCounter;
+ static uint8_t Lin_LinPid;
+
+ uint8_t TxBuffRdy;
 
 /*------------------------------------------------------------------------------
  *         Global Functions
@@ -21,21 +26,74 @@
 
 
 void Lin_Init (uint16_t LinBaudrate){
-      uint32_t mode = (UART_MR_CHMODE_NORMAL | UART_MR_PAR_NO
-					| UART_MR_BRSRCCK_PERIPH_CLK);
-      uint32_t masterClock;
-      
-      UART_Configure(UART0, mode, LinBaudrate, masterClock);
+      Uart_Init(LinBaudrate);
  }
 
 
  void Lin_Isr(void){
 
- 	
+
  }
 
 
  void Lin_SendFrame (uint8_t LinPid){
 
+ 	Lin_LinPid = LinPid;
+
+ 	if(IDLE == ls_Lin_stateMachine){
+
+ 		ls_Lin_stateMachine = SEND_BREAK;
+
+ 	}
+ 	else{
+ 		/*Do Nothing*/
+ 	}
+
+
+ }
+
+ void StateMachine(){
+
+ 	 	switch(ls_Lin_stateMachine){
+
+ 		case(IDLE):
+ 			/*Do Nothing*/
+ 			break;
+
+ 		case(SEND_BREAK):
+ 			if((ls_Lin_ByteCounter == FIRST_BREAK_BYTE) && (TxBuffRdy)){
+ 				UART_PutChar(UART4, 0x00);
+ 				ls_Lin_ByteCounter = SECOND_BREAK_BYTE;
+ 			}
+ 			else if ((ls_Lin_ByteCounter == SECOND_BREAK_BYTE) && (TxBuffRdy)){
+ 				UART_PutChar(UART4, 0x00);
+ 				ls_Lin_ByteCounter = FIRST_BREAK_BYTE;
+ 				/* Change State to SYNC Bytes*/
+ 				ls_Lin_stateMachine = SEND_SYNC;
+ 			}
+ 			else{
+ 				/* Do Nothing */
+ 			}
+ 			break;
+ 		case(SEND_SYNC):
+ 			if (TxBuffRdy){
+ 				UART_PutChar(UART4, 0x55);
+ 				ls_Lin_stateMachine = SEND_PID;
+ 			}
+ 			else{
+ 				/*Do Notihing*/
+ 			}
+ 			break;
+ 		case(SEND_PID):
+ 			if (TxBuffRdy){
+ 				UART_PutChar(UART4,Lin_LinPid);
+ 				ls_Lin_stateMachine = IDLE;
+ 			}
+ 			break;
+ 		case(SEND_RESPONSE):
+ 			break;
+ 		default:
+ 			break;
+ 	}
 
  }

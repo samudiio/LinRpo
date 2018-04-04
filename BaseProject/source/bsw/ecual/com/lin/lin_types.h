@@ -41,4 +41,12 @@ typedef enum
 }LinStateType;
 
 
+typedef enum
+   {
+     FIRST_BREAK_BYTE,
+     SECOND_BREAK_BYTE,
+     SYNC_BYTE,
+     PID_BYTE
+}FrameTypes;
+
 #endif
