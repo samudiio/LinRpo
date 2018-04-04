@@ -4,6 +4,7 @@
 
 #include "board.h"
 #include "app_scheduler.h"
+#include "lin.h"
 #include "Tasks.h"
 #include "MemAlloc.h"
 #include <stdbool.h>
@@ -12,6 +13,8 @@
 /*----------------------------------------------------------------------------
  *        Local definitions
  *----------------------------------------------------------------------------*/
+
+#define LIN_BAUDRATE    115200
 
 FuncPtr array_func[]={
 	vfnTsk_1ms,
@@ -60,10 +63,6 @@ extern int main( void )
     MemAllocInit();
     printf( "\n\r-- Memory Allocation Initialized!!! --\n\r" ) ;
   
-    Uart_Init();
-
-
-    printf( "\n\r-- Tx Done!!! --\n\r" ) ;
 
     /*MCAN_InitTxQueue(loc_mcan_Config);
       printf( "\n\r-- MCAN Tx Queue Initialized!!! --\n\r" ) ;*/
@@ -72,6 +71,8 @@ extern int main( void )
     vfnScheduler_Init(&array_func[0]);
     /* Start execution of task scheduler */
     vfnScheduler_Start();
+
+    Lin_Init(LIN_BAUDRATE);
 
     /*-- Loop through all the periodic tasks from Task Scheduler --*/
     for(;;)

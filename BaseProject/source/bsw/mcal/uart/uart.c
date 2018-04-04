@@ -49,6 +49,9 @@ const Pin Uart_Default_Pins[] = {PINS_UART4};
 
 uint8_t TxBuffRdy = 0;
 
+LINFuncPtr LinFcnPtr;
+
+
 /*------------------------------------------------------------------------------
  *         Exported functions
  *----------------------------------------------------------------------------*/
@@ -71,7 +74,12 @@ void UART4_Handler(void)
     else if((status & UART_MASK_TXRDY) && (!TxBuffRdy))
     {
         TxBuffRdy = 1;
+        
         NVIC_DisableIRQ(UART_IRQ_DEFAULT);
+
+        if (LinFcnPtr){
+            LinFcnPtr();
+        }
     }
     else {
         /*Do Nothing*/
@@ -79,13 +87,15 @@ void UART4_Handler(void)
 }
 
 
-void Uart_Init(void)
+void Uart_Init(uint32_t Baudrate,  void (*linfunc_ptr)(void))
 {
     uint8_t *pBuffer = &pTxBuffer[0];
 
+    LinFcnPtr = linfunc_ptr;
+
     PIO_Configure(Uart_Default_Pins, PIO_LISTSIZE(Uart_Default_Pins));
     PMC_EnablePeripheral(UART_ID_DEFAULT);
-    UART_Configure(UART_DEFAULT, (UART_MR_CHMODE_NORMAL | UART_MR_BRSRCCK_PERIPH_CLK | UART_MR_PAR_NO), 115200, BOARD_MCK);
+    UART_Configure(UART_DEFAULT, (UART_MR_CHMODE_NORMAL | UART_MR_BRSRCCK_PERIPH_CLK | UART_MR_PAR_NO), Baudrate, BOARD_MCK);
 
     NVIC_ClearPendingIRQ(UART_IRQ_DEFAULT);
     NVIC_SetPriority(UART_IRQ_DEFAULT ,1);
@@ -97,14 +107,6 @@ void Uart_Init(void)
     UART_EnableIt(UART_DEFAULT, (UART_IER_RXRDY | UART_IER_TXRDY));
     /* Enable interrupt  */
     NVIC_EnableIRQ(UART_IRQ_DEFAULT);
-
-       
-    while(1){
-      if((*pBuffer != '\0') &&(1 == TxBuffRdy)){
-            UART_PutChar(UART_DEFAULT, *pBuffer);
-            pBuffer++;
-      }
-    }
 }
 
 /**

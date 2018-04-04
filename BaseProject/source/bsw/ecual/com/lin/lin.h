@@ -33,7 +33,7 @@
  *----------------------------------------------------------------------------*/
 
 /* Function prototype to Configure the System and the LIN BUS*/
-void Lin_Init (uint16_t);
+void Lin_Init (uint32_t);
 
 /* Function prototype to manipulate interruptions on the TX*/
 void Lin_Isr(void);

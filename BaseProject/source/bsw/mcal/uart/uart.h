@@ -45,11 +45,19 @@ typedef enum
     UART_MASK_TXEMPTY   = 512
 }UartMasks;
 
+
+typedef void (*LINFuncPtr)(void);
+
+//------------------------------------------------------------------------------
+//         Global variables
+//------------------------------------------------------------------------------
+extern uint8_t TxBuffRdy;
+
 //------------------------------------------------------------------------------
 //         Global functions
 //------------------------------------------------------------------------------
 
-void Uart_Init(void);
+void Uart_Init(uint32_t Baudrate,  void (*linfunc_ptr)(void));
 
 void UART_Configure(Uart *uart, uint32_t mode, uint32_t baudrate, 
 		uint32_t masterClock);
