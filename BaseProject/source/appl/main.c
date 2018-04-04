@@ -47,7 +47,6 @@ static void _ConfigureLeds( void )
  */
 extern int main( void )
 {
-
 	/* Disable watchdog */
 	WDT_Disable( WDT ) ;
 
@@ -66,6 +65,13 @@ extern int main( void )
   MemAllocInit();
   printf( "\n\r-- Memory Allocation Initialized!!! --\n\r" ) ;
   
+  Uart_Init();
+
+
+
+
+  printf( "\n\r-- Tx Done!!! --\n\r" ) ;
+
   /*MCAN_InitTxQueue(loc_mcan_Config);
   printf( "\n\r-- MCAN Tx Queue Initialized!!! --\n\r" ) ;*/
 

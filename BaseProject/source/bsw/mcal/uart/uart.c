@@ -39,12 +39,54 @@
  *----------------------------------------------------------------------------*/
 #include "chip.h"
 
+#include "board.h"
+
 #include <assert.h>
 #include <string.h>
+
+uint8_t pTxBuffer[] = {"This is UART Tx Buffer.........\n\r"};
+const Pin Uart_Default_Pins[] = {PINS_UART4};
 
 /*------------------------------------------------------------------------------
  *         Exported functions
  *----------------------------------------------------------------------------*/
+
+/**
+ *  \brief Handler for UART4.
+ *
+ *  Process UART4 interrupts
+ */
+void UART4_Handler(void)
+{
+    printf("%c", (char)UART_DEFAULT->UART_RHR);
+}
+
+
+void Uart_Init(void)
+{
+    uint8_t *pBuffer = &pTxBuffer[0];
+
+    PIO_Configure(Uart_Default_Pins, PIO_LISTSIZE(Uart_Default_Pins));
+    PMC_EnablePeripheral(UART_ID_DEFAULT);
+    UART_Configure(UART_DEFAULT, (UART_MR_CHMODE_NORMAL | UART_MR_BRSRCCK_PERIPH_CLK | UART_MR_PAR_NO), 115200, BOARD_MCK);
+
+    NVIC_ClearPendingIRQ(UART_IRQ_DEFAULT);
+    NVIC_SetPriority(UART_IRQ_DEFAULT ,1);
+
+    /* Enables the UART to transfer and receive data. */
+    UART_SetTransmitterEnabled (UART_DEFAULT , ENABLE);
+    UART_SetReceiverEnabled (UART_DEFAULT , ENABLE);
+
+    UART_EnableIt(UART_DEFAULT, (UART_IER_RXRDY)); //UART_IER_TXRDY
+    /* Enable interrupt  */
+    NVIC_EnableIRQ(UART_IRQ_DEFAULT);
+
+    while (*pBuffer != '\0') {
+        UART_PutChar(UART_DEFAULT, *pBuffer);
+        pBuffer++;
+    }
+    UART_PutChar(UART_DEFAULT, *pBuffer);
+}
 
 /**
  * \brief Configures an UART peripheral with the specified parameters.

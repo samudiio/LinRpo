@@ -31,10 +31,15 @@
 #ifndef UART_H
 #define UART_H
 
+#define UART_DEFAULT   UART4
+#define UART_ID_DEFAULT     ID_UART4
+#define UART_IRQ_DEFAULT    UART4_IRQn
 
 //------------------------------------------------------------------------------
 //         Global functions
 //------------------------------------------------------------------------------
+
+void Uart_Init(void);
 
 void UART_Configure(Uart *uart, uint32_t mode, uint32_t baudrate, 
 		uint32_t masterClock);
