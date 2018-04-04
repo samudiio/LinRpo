@@ -23,7 +23,7 @@
 /*------------------------------------------------------------------------------
  *         Global Functions
  *----------------------------------------------------------------------------*/
-
+#define BAUDRATE_UPD     115200
 
 
 void Lin_Init (uint32_t LinBaudrate)
@@ -38,7 +38,8 @@ void Lin_Init (uint32_t LinBaudrate)
      if(IDLE == ls_Lin_stateMachine)
      {
          if((ls_Lin_ByteCounter == FIRST_BREAK_BYTE) && (TxBuffRdy)){
-             UART_PutChar(UART4, 0x41);
+             UART_PutChar(UART4, 0x00);
+             UART_UpdateBaudRate(BAUDRATE_UPD);
              ls_Lin_ByteCounter = SECOND_BREAK_BYTE;
          }
          ls_Lin_stateMachine = SEND_BREAK;
@@ -58,7 +59,7 @@ void Lin_Isr(void)
 
         case(SEND_BREAK):
             if ((ls_Lin_ByteCounter == SECOND_BREAK_BYTE) && (TxBuffRdy)){
-                UART_PutChar(UART4, 0x42);
+                UART_PutChar(UART4, 0x00);
                 ls_Lin_ByteCounter = FIRST_BREAK_BYTE;
                 /* Change State to SYNC Bytes*/
                 ls_Lin_stateMachine = SEND_SYNC;

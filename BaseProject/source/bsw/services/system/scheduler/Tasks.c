@@ -36,7 +36,7 @@ void vfnTsk_10ms(void)
 	if(flag)
 	{
 	    flag = 0;
-	    Lin_SendFrame(0x44);//(0x3C);
+	    Lin_SendFrame(0x3C);
 	}
 	u8500ms_Ctr++;
 	

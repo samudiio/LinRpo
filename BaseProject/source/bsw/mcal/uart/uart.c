@@ -109,6 +109,18 @@ void Uart_Init(uint32_t Baudrate,  void (*linfunc_ptr)(void))
     NVIC_EnableIRQ(UART_IRQ_DEFAULT);
 }
 
+void UART_UpdateBaudRate(uint32_t Baudrate)
+{
+    /* Reset and disable receiver & transmitter*/
+    UART_DEFAULT->UART_CR = UART_CR_RSTRX | UART_CR_RSTTX
+            | UART_CR_RXDIS | UART_CR_TXDIS | UART_CR_RSTSTA;
+
+    /* Configure baudrate*/
+    UART_DEFAULT->UART_BRGR = (BOARD_MCK / Baudrate) / 16;
+
+    UART_DEFAULT->UART_CR = UART_CR_TXEN | UART_CR_RXEN;
+}
+
 /**
  * \brief Configures an UART peripheral with the specified parameters.
  *

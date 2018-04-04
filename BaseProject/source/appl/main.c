@@ -14,7 +14,7 @@
  *        Local definitions
  *----------------------------------------------------------------------------*/
 
-#define LIN_BAUDRATE    115200
+#define LIN_BAUDRATE    9600
 
 FuncPtr array_func[]={
 	vfnTsk_1ms,
