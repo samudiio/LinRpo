@@ -31,9 +31,19 @@
 #ifndef UART_H
 #define UART_H
 
-#define UART_DEFAULT   UART4
+#define UART_DEFAULT        UART4
 #define UART_ID_DEFAULT     ID_UART4
 #define UART_IRQ_DEFAULT    UART4_IRQn
+
+typedef enum
+{
+    UART_MASK_RXRDY     = 1,
+    UART_MASK_TXRDY     = 2,
+    UART_MASK_OVRE      = 32,
+    UART_MASK_FRAME     = 64,
+    UART_MASK_PARE      = 128,
+    UART_MASK_TXEMPTY   = 512
+}UartMasks;
 
 //------------------------------------------------------------------------------
 //         Global functions

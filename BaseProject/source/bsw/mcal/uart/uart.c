@@ -47,6 +47,8 @@
 uint8_t pTxBuffer[] = {"This is UART Tx Buffer.........\n\r"};
 const Pin Uart_Default_Pins[] = {PINS_UART4};
 
+uint8_t TxBuffRdy = 0;
+
 /*------------------------------------------------------------------------------
  *         Exported functions
  *----------------------------------------------------------------------------*/
@@ -58,7 +60,22 @@ const Pin Uart_Default_Pins[] = {PINS_UART4};
  */
 void UART4_Handler(void)
 {
-    printf("%c", (char)UART_DEFAULT->UART_RHR);
+    UartMasks status = 0;
+
+    status = UART_DEFAULT->UART_SR;
+
+    if(status & UART_MASK_RXRDY)
+    {
+        printf("%c", (char)UART_DEFAULT->UART_RHR);
+    }
+    else if((status & UART_MASK_TXRDY) && (!TxBuffRdy))
+    {
+        TxBuffRdy = 1;
+        NVIC_DisableIRQ(UART_IRQ_DEFAULT);
+    }
+    else {
+        /*Do Nothing*/
+    }
 }
 
 
@@ -77,15 +94,17 @@ void Uart_Init(void)
     UART_SetTransmitterEnabled (UART_DEFAULT , ENABLE);
     UART_SetReceiverEnabled (UART_DEFAULT , ENABLE);
 
-    UART_EnableIt(UART_DEFAULT, (UART_IER_RXRDY)); //UART_IER_TXRDY
+    UART_EnableIt(UART_DEFAULT, (UART_IER_RXRDY | UART_IER_TXRDY));
     /* Enable interrupt  */
     NVIC_EnableIRQ(UART_IRQ_DEFAULT);
 
-    while (*pBuffer != '\0') {
-        UART_PutChar(UART_DEFAULT, *pBuffer);
-        pBuffer++;
+       
+    while(1){
+      if((*pBuffer != '\0') &&(1 == TxBuffRdy)){
+            UART_PutChar(UART_DEFAULT, *pBuffer);
+            pBuffer++;
+      }
     }
-    UART_PutChar(UART_DEFAULT, *pBuffer);
 }
 
 /**
@@ -201,13 +220,21 @@ static uint32_t UART_IsTxSent(Uart *uart)
 void UART_PutChar( Uart *uart, uint8_t c)
 {
 	/* Wait for the transmitter to be ready*/
-	while (!UART_IsRxReady(uart) && !UART_IsTxSent(uart));
+	//while (!UART_IsRxReady(uart) && !UART_IsTxSent(uart));
 
-	/* Send character*/
-	uart->UART_THR = c;
+    if(TxBuffRdy == 1)
+    {
+        TxBuffRdy = 0;
+
+        /* Send character*/
+        uart->UART_THR = c;
+        NVIC_EnableIRQ(UART_IRQ_DEFAULT);
+    }
+
+
 
 	/* Wait for the transfer to complete*/
-	while (!UART_IsTxSent(uart));
+	//while (!UART_IsTxSent(uart));
 }
 
 /**

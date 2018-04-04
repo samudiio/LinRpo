@@ -47,44 +47,37 @@ static void _ConfigureLeds( void )
  */
 extern int main( void )
 {
-	/* Disable watchdog */
-	WDT_Disable( WDT ) ;
+    /* Disable watchdog */
+    WDT_Disable( WDT ) ;
 
-	/* Output example information */
-	printf( "\n\r-- Getting Started Example Workspace Updated!!! %s --\n\r", SOFTPACK_VERSION ) ;
-	printf( "-- %s\n\r", BOARD_NAME ) ;
-	printf( "-- Compiled: %s %s With %s--\n\r", __DATE__, __TIME__ , COMPILER_NAME);
+    /* Enable I and D cache */
+    SCB_EnableICache();
+    SCB_EnableDCache();
 
-	/* Enable I and D cache */
-	SCB_EnableICache();
-  SCB_EnableDCache();
-
-	printf( "Configure LED PIOs.\n\r" ) ;
-	_ConfigureLeds() ;
+    printf( "Configure LED PIOs.\n\r" ) ;
+    _ConfigureLeds() ;
   
-  MemAllocInit();
-  printf( "\n\r-- Memory Allocation Initialized!!! --\n\r" ) ;
+    MemAllocInit();
+    printf( "\n\r-- Memory Allocation Initialized!!! --\n\r" ) ;
   
-  Uart_Init();
+    Uart_Init();
 
 
+    printf( "\n\r-- Tx Done!!! --\n\r" ) ;
 
+    /*MCAN_InitTxQueue(loc_mcan_Config);
+      printf( "\n\r-- MCAN Tx Queue Initialized!!! --\n\r" ) ;*/
 
-  printf( "\n\r-- Tx Done!!! --\n\r" ) ;
+    /* Initialize Task Scheduler */
+    vfnScheduler_Init(&array_func[0]);
+    /* Start execution of task scheduler */
+    vfnScheduler_Start();
 
-  /*MCAN_InitTxQueue(loc_mcan_Config);
-  printf( "\n\r-- MCAN Tx Queue Initialized!!! --\n\r" ) ;*/
-
-  	/* Initialize Task Scheduler */
-	vfnScheduler_Init(&array_func[0]);
-	/* Start execution of task scheduler */
-	vfnScheduler_Start();
-
-	/*-- Loop through all the periodic tasks from Task Scheduler --*/
-	for(;;)
-	{
-		/* Perform all scheduled tasks */
-		vfnTask_Scheduler();
-	}
+    /*-- Loop through all the periodic tasks from Task Scheduler --*/
+    for(;;)
+    {
+        /* Perform all scheduled tasks */
+        vfnTask_Scheduler();
+    }
 
 }
