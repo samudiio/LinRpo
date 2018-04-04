@@ -1,6 +1,8 @@
 
 /**
- * \file
+ * \file: lin.c
+ * \Desription: Comunication File to control LIN Headder
+ * \Date: 03/04/2018
  */
 
 /*-----------------------------------------------------------------------------
@@ -10,59 +12,70 @@
 #include "board.h"
 #include "lin.h"
 
-/*------------------------------------------------------------------------------
- *          Variables
+/*-----------------------------------------------------------------------------
+ *         Defines
  *----------------------------------------------------------------------------*/
 
- static uint8_t ls_Lin_stateMachine;
- static uint8_t ls_Lin_ByteCounter;
- static uint8_t Lin_LinPid;
+#define BAUDRATE_UPD     115200
+
+/*------------------------------------------------------------------------------
+ *          Global Variables
+ *----------------------------------------------------------------------------*/
+
+ static uint8_t gs_Lin_stateMachine;
+ static uint8_t gs_Lin_ByteCounter;
+ static uint8_t gs_Lin_LinPid;
 
  uint8_t TxBuffRdy;
 
 /*------------------------------------------------------------------------------
  *         Global Functions
  *----------------------------------------------------------------------------*/
-#define BAUDRATE_UPD     115200
 
 
+
+/* Lin_Init: UART driver Init Function*/
 void Lin_Init (uint32_t LinBaudrate)
 {
     Uart_Init(LinBaudrate, Lin_Isr);
 }
-
+/* Lin_SendFrame: LIN function that send the frame every 10ms*/
  void Lin_SendFrame (uint8_t LinPid)
  {
-     Lin_LinPid = LinPid;
+     gs_Lin_LinPid = LinPid;
 
-     if(IDLE == ls_Lin_stateMachine)
+     if(IDLE == gs_Lin_stateMachine)
      {
-         if((ls_Lin_ByteCounter == FIRST_BREAK_BYTE) && (TxBuffRdy)){
+         if((gs_Lin_ByteCounter == FIRST_BREAK_BYTE) && (TxBuffRdy)){
              UART_PutChar(UART4, 0x00);
              UART_UpdateBaudRate(BAUDRATE_UPD);
-             ls_Lin_ByteCounter = SECOND_BREAK_BYTE;
+             gs_Lin_ByteCounter = SECOND_BREAK_BYTE;
          }
-         ls_Lin_stateMachine = SEND_BREAK;
+         else{
+            /*Do Nothing*/
+         }
+         gs_Lin_stateMachine = SEND_BREAK;
      }
      else{
          /*Do Nothing*/
      }
  }
 
+/* Lin_Isr: LIN callback function for UART Interrupt also implement the StateMachine*/
 void Lin_Isr(void)
 {
-    switch(ls_Lin_stateMachine)
+    switch(gs_Lin_stateMachine)
     {
         case(IDLE):
             /*Do Nothing*/
             break;
 
         case(SEND_BREAK):
-            if ((ls_Lin_ByteCounter == SECOND_BREAK_BYTE) && (TxBuffRdy)){
+            if ((gs_Lin_ByteCounter == SECOND_BREAK_BYTE) && (TxBuffRdy)){
                 UART_PutChar(UART4, 0x00);
-                ls_Lin_ByteCounter = FIRST_BREAK_BYTE;
+                gs_Lin_ByteCounter = FIRST_BREAK_BYTE;
                 /* Change State to SYNC Bytes*/
-                ls_Lin_stateMachine = SEND_SYNC;
+                gs_Lin_stateMachine = SEND_SYNC;
             }
             else{
                 /* Do Nothing */
@@ -71,7 +84,7 @@ void Lin_Isr(void)
             case(SEND_SYNC):
                 if (TxBuffRdy){
                     UART_PutChar(UART4, 0x55);
-                    ls_Lin_stateMachine = SEND_PID;
+                    gs_Lin_stateMachine = SEND_PID;
                 }
                 else{
                     /*Do Notihing*/
@@ -79,8 +92,11 @@ void Lin_Isr(void)
                 break;
             case(SEND_PID):
                 if (TxBuffRdy){
-                    UART_PutChar(UART4,Lin_LinPid);
-                    ls_Lin_stateMachine = IDLE;
+                    UART_PutChar(UART4,gs_Lin_LinPid);
+                    gs_Lin_stateMachine = IDLE;
+                }
+                else{
+                    /*Do Nothing*/
                 }
                 break;
             case(SEND_RESPONSE):

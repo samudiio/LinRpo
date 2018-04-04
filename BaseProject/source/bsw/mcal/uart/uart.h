@@ -31,6 +31,10 @@
 #ifndef UART_H
 #define UART_H
 
+//------------------------------------------------------------------------------
+//         TypeDefs and Defines
+//------------------------------------------------------------------------------
+
 #define UART_DEFAULT        UART4
 #define UART_ID_DEFAULT     ID_UART4
 #define UART_IRQ_DEFAULT    UART4_IRQn

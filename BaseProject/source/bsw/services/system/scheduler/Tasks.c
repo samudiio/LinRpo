@@ -31,13 +31,9 @@ void vfnTsk_2msB(void)
 void vfnTsk_10ms(void)
 {
 	static uint8_t u8500ms_Ctr=0;
-	static uint8_t flag = 1;
 	
-	if(flag)
-	{
-	    flag = 0;
-	    Lin_SendFrame(0x3C);
-	}
+	Lin_SendFrame(0x3C);
+	
 	u8500ms_Ctr++;
 	
 	if (25 <= u8500ms_Ctr)

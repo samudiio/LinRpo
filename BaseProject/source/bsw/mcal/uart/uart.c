@@ -44,6 +44,10 @@
 #include <assert.h>
 #include <string.h>
 
+/*------------------------------------------------------------------------------
+ *         Global Valiables
+ *----------------------------------------------------------------------------*/
+
 uint8_t pTxBuffer[] = {"This is UART Tx Buffer.........\n\r"};
 const Pin Uart_Default_Pins[] = {PINS_UART4};
 
@@ -79,6 +83,9 @@ void UART4_Handler(void)
 
         if (LinFcnPtr){
             LinFcnPtr();
+        }
+        else{
+        	/*Do Nothing*/
         }
     }
     else {
@@ -236,13 +243,15 @@ void UART_PutChar( Uart *uart, uint8_t c)
 	/* Wait for the transmitter to be ready*/
 	//while (!UART_IsRxReady(uart) && !UART_IsTxSent(uart));
 
-    if(TxBuffRdy == 1)
+    if(1 == TxBuffRdy)
     {
         TxBuffRdy = 0;
-
         /* Send character*/
         uart->UART_THR = c;
         NVIC_EnableIRQ(UART_IRQ_DEFAULT);
+    }
+    else{
+    	/*Do Nothing*/
     }
 
 
