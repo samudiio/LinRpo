@@ -40,7 +40,7 @@ typedef enum
      SEND_RESPONSE
 }LinStateType;
 
-
+/*Description: */
 typedef enum
    {
      FIRST_BREAK_BYTE,
@@ -48,5 +48,36 @@ typedef enum
      SYNC_BYTE,
      PID_BYTE
 }FrameTypes;
+
+
+/*Description: The LIN identifier (0..0x3F) along with its two parity bits*/
+typedef uint8_t LinFramePidType;
+
+/*Description: Specifies the Checksum model used in the LIN Frame*/
+typedef enum {
+    LIN_ENHANCED_CS,
+    LIN_CLASSIC_CS
+}LinFrameCsModelType;    
+
+
+/* Specifies whether the frame processor is required to transmit the response part of the LIN fram*/
+typedef enum{
+    LIN_MASTER_RESPONSE,
+    LIN_SLAVE_RESPONSE
+}LinFrameResponseType;
+
+typedef uint8_t LinFrameDlType;
+
+
+/*This type is used to provide PID, checksum model, data length and SDU pointer to the LIN driver*/
+typedef struct LinPduTypes{
+    LinFramePidType         Pid;
+    LinFrameCsModelType     Cs;
+    LinFrameResponseType    Drc;
+    LinFrameDlType          Dl;
+    uint8_t*                SduPtr;
+}LinPduType;
+
+
 
 #endif
