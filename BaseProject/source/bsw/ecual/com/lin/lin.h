@@ -28,7 +28,7 @@
 /*----------------------------------------------------------------------------
  *       Includes
  *----------------------------------------------------------------------------*/
-#include <stdint.h>
+
 #include "lin_types.h"
 
 /*----------------------------------------------------------------------------
@@ -38,11 +38,17 @@
 /* Function prototype to Configure the System and the LIN BUS*/
 void Lin_Init (uint32_t);
 
+/* Function prototype to Send the LIN Frame*/
+void Lin_SendFrame (uint8_t);
+
+Std_ReturnType Lin_GetSlaveResponse (uint8_t Channel, uint8_t** LinSduPtr);
+
 /* Function prototype to manipulate interruptions on the TX*/
 void Lin_Isr(void);
 
-/* Function prototype to Send the LIN Frame*/
-void Lin_SendFrame (uint8_t);
+
+
+
 
 #endif /* #ifndef LIN_H */
 

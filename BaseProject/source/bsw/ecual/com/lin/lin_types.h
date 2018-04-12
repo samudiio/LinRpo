@@ -24,15 +24,18 @@
 #ifndef _LIN_TYPES_
 #define _LIN_TYPES_
 
-#include <stdint.h>
+/*----------------------------------------------------------------------------
+ *       Includes
+ *----------------------------------------------------------------------------*/
+
+#include "std_types.h"
 
 /*----------------------------------------------------------------------------
  *        TypeDefs
  *----------------------------------------------------------------------------*/
 
 
-typedef enum
-   {
+typedef enum {
      IDLE,
      SEND_BREAK,
      SEND_SYNC,
@@ -41,8 +44,7 @@ typedef enum
 }LinStateType;
 
 /*Description: */
-typedef enum
-   {
+typedef enum {
      FIRST_BREAK_BYTE,
      SECOND_BREAK_BYTE,
      SYNC_BYTE,
@@ -61,16 +63,17 @@ typedef enum {
 
 
 /* Specifies whether the frame processor is required to transmit the response part of the LIN fram*/
-typedef enum{
+typedef enum {
     LIN_MASTER_RESPONSE,
     LIN_SLAVE_RESPONSE
 }LinFrameResponseType;
 
+/*Specifies the number of SDU of data bytes to copy*/
 typedef uint8_t LinFrameDlType;
 
 
 /*This type is used to provide PID, checksum model, data length and SDU pointer to the LIN driver*/
-typedef struct LinPduTypes{
+typedef struct LinPduTypes {
     LinFramePidType         Pid;
     LinFrameCsModelType     Cs;
     LinFrameResponseType    Drc;

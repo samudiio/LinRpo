@@ -6,11 +6,11 @@
  */
 
 /*-----------------------------------------------------------------------------
- *         Headers
+ *         Includes
  *----------------------------------------------------------------------------*/
 
-#include "board.h"
 #include "lin.h"
+#include "uart.h"
 
 /*-----------------------------------------------------------------------------
  *         Defines
@@ -32,13 +32,12 @@
  *         Global Functions
  *----------------------------------------------------------------------------*/
 
-
-
 /* Lin_Init: UART driver Init Function*/
 void Lin_Init (uint32_t LinBaudrate)
 {
     Uart_Init(LinBaudrate, Lin_Isr);
 }
+
 /* Lin_SendFrame: LIN function that send the frame every 10ms*/
  void Lin_SendFrame (uint8_t LinPid)
  {
@@ -59,6 +58,11 @@ void Lin_Init (uint32_t LinBaudrate)
      else{
          /*Do Nothing*/
      }
+ }
+
+ Std_ReturnType Lin_GetSlaveResponse ( uint8_t Channel, uint8_t** LinSduPtr )
+ {
+     return 0;
  }
 
 /* Lin_Isr: LIN callback function for UART Interrupt also implement the StateMachine*/
