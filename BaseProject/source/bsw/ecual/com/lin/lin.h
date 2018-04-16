@@ -36,10 +36,10 @@
  *----------------------------------------------------------------------------*/
 
 /* Function prototype to Configure the System and the LIN BUS*/
-void Lin_Init (uint32_t);
+void Lin_Init (const LinConfigType* Config);
 
 /* Function prototype to Send the LIN Frame*/
-void Lin_SendFrame (uint8_t);
+Std_ReturnType Lin_SendFrame (uint8_t Channel, LinPduType* PduInfoPtr);
 
 Std_ReturnType Lin_GetSlaveResponse (uint8_t Channel, uint8_t** LinSduPtr);
 

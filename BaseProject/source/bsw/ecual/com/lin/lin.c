@@ -33,15 +33,17 @@
  *----------------------------------------------------------------------------*/
 
 /* Lin_Init: UART driver Init Function*/
-void Lin_Init (uint32_t LinBaudrate)
+void Lin_Init (const LinConfigType* Config)
 {
+    uint8_t LinBaudrate;
+    LinBaudrate = Config->ChTyp.ChBr;
     Uart_Init(LinBaudrate, Lin_Isr);
 }
 
 /* Lin_SendFrame: LIN function that send the frame every 10ms*/
- void Lin_SendFrame (uint8_t LinPid)
+ Std_ReturnType Lin_SendFrame (uint8_t Channel, LinPduType* PduInfoPtr)
  {
-     gs_Lin_LinPid = LinPid;
+     gs_Lin_LinPid = 0;//LinPid;
 
      if(IDLE == gs_Lin_stateMachine)
      {
@@ -58,6 +60,7 @@ void Lin_Init (uint32_t LinBaudrate)
      else{
          /*Do Nothing*/
      }
+    return 0;
  }
 
  Std_ReturnType Lin_GetSlaveResponse ( uint8_t Channel, uint8_t** LinSduPtr )
@@ -109,3 +112,4 @@ void Lin_Isr(void)
                 break;
     }
 }
+

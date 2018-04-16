@@ -7,7 +7,7 @@
 
 #include "Tasks.h"
 #include "led.h"
-#include "lin.h"
+#include "linNM.h"
 
 uint8_t u8100ms_Ctr=0;
 uint8_t u8100ms_Ctr2=0;
@@ -32,8 +32,8 @@ void vfnTsk_10ms(void)
 {
 	static uint8_t u8500ms_Ctr=0;
 	
-	Lin_SendFrame(0x3C);
-	
+	//Lin_SendFrame(0x3C);
+	LIN_10Task();
 	u8500ms_Ctr++;
 	
 	if (25 <= u8500ms_Ctr)

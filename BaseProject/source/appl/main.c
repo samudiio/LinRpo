@@ -25,6 +25,8 @@ FuncPtr array_func[]={
 	vfnTsk_100ms
 };
 
+struct LinConfigType Config;
+
 /*----------------------------------------------------------------------------
  *        Local functions
  *----------------------------------------------------------------------------*/
@@ -71,8 +73,9 @@ extern int main( void )
     vfnScheduler_Init(&array_func[0]);
     /* Start execution of task scheduler */
     vfnScheduler_Start();
+    Config.ChTyp.ChBr = LIN_BAUDRATE;
 
-    Lin_Init(LIN_BAUDRATE);
+    Lin_Init(&Config);
 
     /*-- Loop through all the periodic tasks from Task Scheduler --*/
     for(;;)
