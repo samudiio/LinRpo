@@ -33,10 +33,11 @@
  *----------------------------------------------------------------------------*/
 
 /* Lin_Init: UART driver Init Function*/
-void Lin_Init (const LinConfigType* Config)
+void Lin_Init (const LinConfig_T* Config)
 {
     uint8_t LinBaudrate;
-    LinBaudrate = Config->ChTyp.ChBr;
+
+    LinBaudrate = Config->LinChannel.LinChannelBaudrate;
     Uart_Init(LinBaudrate, Lin_Isr);
 }
 

@@ -82,24 +82,4 @@ typedef struct LinPduTypes {
 }LinPduType;
 
 
-/*Lin Number of Channels*/
-typedef uint8_t LinNumberOfChannels;
-typedef uint8_t LinChannelId;
-typedef uint16_t LinChannelBaudrate;
-
-/* LIN Channel*/
-typedef struct LinChannelType{
-    LinChannelId        ChId;
-    LinChannelBaudrate  ChBr;  
-
-}LinChannelType;
-
-/* LIN Config  Type*/
-typedef struct LinConfigType {
-    LinNumberOfChannels     ChNum;
-    LinChannelType          ChTyp;
-
-}LinConfigType;
-
-
 #endif

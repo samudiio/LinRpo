@@ -29,6 +29,7 @@
  *       Includes
  *----------------------------------------------------------------------------*/
 
+#include "lin_cfg.h"
 #include "lin_types.h"
 
 /*----------------------------------------------------------------------------
@@ -36,7 +37,7 @@
  *----------------------------------------------------------------------------*/
 
 /* Function prototype to Configure the System and the LIN BUS*/
-void Lin_Init (const LinConfigType* Config);
+void Lin_Init (const LinConfig_T* Config);
 
 /* Function prototype to Send the LIN Frame*/
 Std_ReturnType Lin_SendFrame (uint8_t Channel, LinPduType* PduInfoPtr);

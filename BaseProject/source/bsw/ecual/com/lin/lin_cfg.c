@@ -1,21 +1,10 @@
 /*
- * LinNM.c
+ * lin_cfg.c
  *
- */ 
+ */
 
 /*-----------------------------------------------------------------------------
  *         Includes
  *----------------------------------------------------------------------------*/
 
-#include "Lin.h"
-
-
-
-void LIN_10Task(void){
-	uint8_t Channel = 0;
-	LinPduType PduInfoPtr;
-
-	Lin_SendFrame(Channel, &PduInfoPtr);
-
-
-}
+#include "lin_cfg.h"
