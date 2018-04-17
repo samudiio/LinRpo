@@ -14,7 +14,7 @@
  *        Local definitions
  *----------------------------------------------------------------------------*/
 
-#define LIN_BAUDRATE    9600
+
 
 FuncPtr array_func[]={
 	vfnTsk_1ms,
@@ -74,8 +74,7 @@ extern int main( void )
     /* Start execution of task scheduler */
     vfnScheduler_Start();
 
-    Config.LinChannel.LinChannelBaudrate = LIN_BAUDRATE;
-    Lin_Init(&Config);
+    Lin_Init(LIN_Config);
 
     /*-- Loop through all the periodic tasks from Task Scheduler --*/
     for(;;)
