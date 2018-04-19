@@ -9,11 +9,11 @@
 
 #include "Lin.h"
 
-
+uint8_t Channel = 0;
+LinPduType PduInfoPtr;
 
 void LIN_10Task(void){
-	uint8_t Channel = 0;
-	LinPduType PduInfoPtr;
+    PduInfoPtr.Pid = 0x3C;
 
 	Lin_SendFrame(Channel, &PduInfoPtr);
 

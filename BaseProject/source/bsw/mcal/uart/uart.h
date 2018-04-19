@@ -31,6 +31,9 @@
 #ifndef UART_H
 #define UART_H
 
+#include "board.h"
+#include "samv71q21.h"
+
 //------------------------------------------------------------------------------
 //         TypeDefs and Defines
 //------------------------------------------------------------------------------
@@ -38,6 +41,8 @@
 #define UART_DEFAULT        UART4
 #define UART_ID_DEFAULT     ID_UART4
 #define UART_IRQ_DEFAULT    UART4_IRQn
+
+#define UART_MAX_CH     5
 
 typedef enum
 {
@@ -48,7 +53,6 @@ typedef enum
     UART_MASK_PARE      = 128,
     UART_MASK_TXEMPTY   = 512
 }UartMasks;
-
 
 typedef void (*LINFuncPtr)(void);
 
@@ -61,7 +65,7 @@ extern uint8_t TxBuffRdy;
 //         Global functions
 //------------------------------------------------------------------------------
 
-void Uart_Init(uint32_t Baudrate,  void (*linfunc_ptr)(void));
+void Uart_Init(uint8_t PhyChannel, uint32_t Baudrate,  void (*linfunc_ptr)(void));
 
 void UART_UpdateBaudRate(uint32_t Baudrate);
 

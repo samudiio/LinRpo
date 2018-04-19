@@ -44,17 +44,37 @@
 #include <assert.h>
 #include <string.h>
 
+//------------------------------------------------------------------------------
+//         TypeDefs and Defines
+//------------------------------------------------------------------------------
+
+typedef struct
+{
+    IRQn_Type   UartIRQn[UART_MAX_CH];
+    uint32_t    UartPeriphIds[UART_MAX_CH];
+    Pin         UartPinId[UART_MAX_CH];
+    Uart        *UartBaseAddress[UART_MAX_CH];
+}UartPeripheralConfig_Type;
+
 /*------------------------------------------------------------------------------
  *         Global Valiables
  *----------------------------------------------------------------------------*/
+Uart *UartPtrg;
+IRQn_Type Uart_IRQIdg;
 
 uint8_t pTxBuffer[] = {"This is UART Tx Buffer.........\n\r"};
-const Pin Uart_Default_Pins[] = {PINS_UART4};
 
 uint8_t TxBuffRdy = 0;
 
 LINFuncPtr LinFcnPtr;
 
+const UartPeripheralConfig_Type UartCfg =
+{
+    {UART0_IRQn, UART1_IRQn, UART2_IRQn, UART3_IRQn, UART4_IRQn},
+    {ID_UART0, ID_UART1, ID_UART2, ID_UART3, ID_UART4},
+    {PINS_UART0, PINS_UART1, PINS_UART2, PINS_UART3, PINS_UART4},
+    {UART0, UART1, UART2, UART3, UART4}
+};
 
 /*------------------------------------------------------------------------------
  *         Exported functions
@@ -79,7 +99,7 @@ void UART4_Handler(void)
     {
         TxBuffRdy = 1;
         
-        NVIC_DisableIRQ(UART_IRQ_DEFAULT);
+        NVIC_DisableIRQ(Uart_IRQIdg);
 
         if (LinFcnPtr){
             LinFcnPtr();
@@ -93,39 +113,55 @@ void UART4_Handler(void)
     }
 }
 
-
-void Uart_Init(uint32_t Baudrate,  void (*linfunc_ptr)(void))
+void Uart_Init(uint8_t PhyChannel, uint32_t Baudrate,  void (*linfunc_ptr)(void))
 {
     uint8_t *pBuffer = &pTxBuffer[0];
+    uint32_t UartPeriphId;
+    Pin Uart_Pins;
 
     LinFcnPtr = linfunc_ptr;
 
-    PIO_Configure(Uart_Default_Pins, PIO_LISTSIZE(Uart_Default_Pins));
-    PMC_EnablePeripheral(UART_ID_DEFAULT);
-    UART_Configure(UART_DEFAULT, (UART_MR_CHMODE_NORMAL | UART_MR_BRSRCCK_PERIPH_CLK | UART_MR_PAR_NO), Baudrate, BOARD_MCK);
+    /*Get Pointer to the UART peripheral to configure.*/
+    UartPtrg = UartCfg.UartBaseAddress[PhyChannel];
 
-    NVIC_ClearPendingIRQ(UART_IRQ_DEFAULT);
-    NVIC_SetPriority(UART_IRQ_DEFAULT ,1);
+    /*Get UART Interrupt Number.*/
+    Uart_IRQIdg = UartCfg.UartIRQn[PhyChannel];
+
+    /*Get UART Peripherial Id*/
+    UartPeriphId = UartCfg.UartPeriphIds[PhyChannel];
+
+    /*Get UART pins to configure*/
+    Uart_Pins = UartCfg.UartPinId[PhyChannel];
+
+    PIO_Configure(&Uart_Pins, PIO_LISTSIZE(Uart_Pins));
+    PMC_EnablePeripheral(UartPeriphId);
+    UART_Configure(UartPtrg, (UART_MR_CHMODE_NORMAL | UART_MR_BRSRCCK_PERIPH_CLK | UART_MR_PAR_NO), Baudrate, BOARD_MCK);
+
+    NVIC_ClearPendingIRQ(Uart_IRQIdg);
+    NVIC_SetPriority(Uart_IRQIdg ,1);
 
     /* Enables the UART to transfer and receive data. */
-    UART_SetTransmitterEnabled (UART_DEFAULT , ENABLE);
-    UART_SetReceiverEnabled (UART_DEFAULT , ENABLE);
+    UART_SetTransmitterEnabled (UartPtrg , ENABLE);
+    UART_SetReceiverEnabled (UartPtrg , ENABLE);
 
-    UART_EnableIt(UART_DEFAULT, (UART_IER_RXRDY | UART_IER_TXRDY));
+    UART_EnableIt(UartPtrg, (UART_IER_RXRDY | UART_IER_TXRDY));
     /* Enable interrupt  */
-    NVIC_EnableIRQ(UART_IRQ_DEFAULT);
+    NVIC_EnableIRQ(Uart_IRQIdg);
 }
 
+/*Todo
+ *  Verify how to handle diferent channel requests when call this function.
+ */
 void UART_UpdateBaudRate(uint32_t Baudrate)
 {
     /* Reset and disable receiver & transmitter*/
-    UART_DEFAULT->UART_CR = UART_CR_RSTRX | UART_CR_RSTTX
+    UartPtrg->UART_CR = UART_CR_RSTRX | UART_CR_RSTTX
             | UART_CR_RXDIS | UART_CR_TXDIS | UART_CR_RSTSTA;
 
     /* Configure baudrate*/
-    UART_DEFAULT->UART_BRGR = (BOARD_MCK / Baudrate) / 16;
+    UartPtrg->UART_BRGR = (BOARD_MCK / Baudrate) / 16;
 
-    UART_DEFAULT->UART_CR = UART_CR_TXEN | UART_CR_RXEN;
+    UartPtrg->UART_CR = UART_CR_TXEN | UART_CR_RXEN;
 }
 
 /**
@@ -248,7 +284,7 @@ void UART_PutChar( Uart *uart, uint8_t c)
         TxBuffRdy = 0;
         /* Send character*/
         uart->UART_THR = c;
-        NVIC_EnableIRQ(UART_IRQ_DEFAULT);
+        NVIC_EnableIRQ(Uart_IRQIdg);
     }
     else{
     	/*Do Nothing*/

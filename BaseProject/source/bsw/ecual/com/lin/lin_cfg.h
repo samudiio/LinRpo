@@ -17,7 +17,7 @@
  *         Type Definitions
  *----------------------------------------------------------------------------*/
 
-typedef enum Lin_Ch_Tag
+typedef enum
 {
     LINCfg_PhyCh_0 = 0,
     LINCfg_PhyCh_1,
@@ -36,7 +36,7 @@ typedef struct LinChannel_Tag
 typedef struct LinConfig_Tag
 {
     uint8_t             LinNumberOfChannels;    /*Number of channels to be configured*/
-    const Linchannel_T  *PtrLinChannelCfg;      /*Parameters related to each LIN channel*/
+    const Linchannel_T  *PtrLinChannelCfg;      /*Parameters related to each LIN channel (1..n)*/
 }LinConfig_T;
 
 /*----------------------------------------------------------------------------

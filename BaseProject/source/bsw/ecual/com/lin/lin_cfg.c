@@ -29,12 +29,12 @@ const Linchannel_T LIN_ChannelConfig[] =
     {
         LINCfg_PhyCh_4,
         LIN_BAUDRATE
-    },
+    }//,
     /*Logical Channel 1*/
-    {
+    /*{
         LINCfg_PhyCh_0,
         LIN_BAUDRATE_HS
-    }
+    }*/
 };
 
 /*

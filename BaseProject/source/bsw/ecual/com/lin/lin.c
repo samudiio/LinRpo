@@ -16,11 +16,44 @@
  *         Defines
  *----------------------------------------------------------------------------*/
 
-#define BAUDRATE_UPD     115200
+#define BAUDRATE_UPD    115200
+
+/*------------------------------------------------------------------------------
+ *         Types Definitions
+ *----------------------------------------------------------------------------*/
+
+typedef enum
+{
+    Lin_NotBussy = 0,
+    Lin_Bussy,
+}LinDvrStateType;
+
+/*
+ * Channel-specific status parameters
+ */
+typedef struct
+{
+    uint8_t Channel;
+    LinDvrStateType TxBussy;
+    LinDvrStateType RxBussy;
+}LinChStatusType;
+
+/*
+ * Driver-specific status parameters
+ */
+typedef struct
+{
+    uint8_t ChannelNumber;
+    const LinChStatusType *PtrChStatus;
+}LinStatusType;
 
 /*------------------------------------------------------------------------------
  *          Global Variables
  *----------------------------------------------------------------------------*/
+const LinConfig_T *gLinConfigPtr;    /*Gobal Pointer to Lin configuration*/
+const LinStatusType *gLinStatusPtr;
+
+uint8_t LinPhysicaltoLogicalCh[UART_MAX_CH];
 
  static uint8_t gs_Lin_stateMachine;
  static uint8_t gs_Lin_ByteCounter;
@@ -35,16 +68,41 @@
 /* Lin_Init: UART driver Init Function*/
 void Lin_Init (const LinConfig_T *Config)
 {
+    uint8_t Lin_Idx;
+    uint8_t PhyChannel;
     uint32_t LinBaudrate;
+    Linchannel_T Lin_LogChannel;
 
-    LinBaudrate = Config->PtrLinChannelCfg[0].LinChannelBaudrate;
-    Uart_Init(LinBaudrate, Lin_Isr);
+    /*Copy Lin Configuration to a global variable*/
+    gLinConfigPtr = Config;
+
+    /*Reserve necesary memory to store internal status structure according to the total numer of channels defined in configuration*/
+    gLinStatusPtr = (LinStatusType*) MemAlloc( (sizeof(LinStatusType)) * (gLinConfigPtr->LinNumberOfChannels));
+
+    /*Do for all channels confugured*/
+    for(Lin_Idx = 0; Lin_Idx < gLinConfigPtr->LinNumberOfChannels; Lin_Idx++)
+    {
+        /*Get Logical Channel*/
+        Lin_LogChannel = gLinConfigPtr->PtrLinChannelCfg[Lin_Idx];
+
+        /*Get Physical Channel*/
+        PhyChannel = Lin_LogChannel.LinChannelId;
+
+        /*Get Baudrate to configure*/
+        LinBaudrate = Lin_LogChannel.LinChannelBaudrate;
+
+        /*Map corresponding channels*/
+        LinPhysicaltoLogicalCh[PhyChannel] = Lin_Idx;
+
+        /*Initialitate UART module*/
+        Uart_Init(PhyChannel, LinBaudrate, Lin_Isr);
+    }
 }
 
 /* Lin_SendFrame: LIN function that send the frame every 10ms*/
  Std_ReturnType Lin_SendFrame (uint8_t Channel, LinPduType* PduInfoPtr)
  {
-     gs_Lin_LinPid = 0;//LinPid;
+     gs_Lin_LinPid = PduInfoPtr->Pid;
 
      if(IDLE == gs_Lin_stateMachine)
      {
