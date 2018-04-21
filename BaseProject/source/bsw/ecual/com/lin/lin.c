@@ -58,6 +58,11 @@ uint8_t LinLogicaltoPhysicalCh[UART_MAX_CH];
  static uint8_t gs_Lin_stateMachine;
  static uint8_t gs_Lin_ByteCounter;
  static uint8_t gs_Lin_LinPid;
+ static uint8_t gs_Lin_LinFrameResponse;
+ static uint8_t gs_Lin_LinFrameDlc;
+ static uint8_t gs_Lin_LinFrameMessageCounter;
+
+ static uint8_t *gs_Lin_LinFrameData;
 
  uint8_t TxBuffRdy;
 
@@ -102,7 +107,10 @@ void Lin_Init (const LinConfig_T *Config)
 /* Lin_SendFrame: LIN function that send the frame every 10ms*/
  Std_ReturnType Lin_SendFrame (uint8_t Channel, LinPduType* PduInfoPtr)
  {
-     gs_Lin_LinPid = PduInfoPtr->Pid;
+     gs_Lin_LinPid              = PduInfoPtr->Pid;
+     gs_Lin_LinFrameResponse    = PduInfoPtr->Drc;
+     gs_Lin_LinFrameDlc         = PduInfoPtr->Dl;
+     gs_Lin_LinFrameData        = PduInfoPtr->SduPtr;
 
      if(IDLE == gs_Lin_stateMachine)
      {
@@ -159,13 +167,32 @@ void Lin_Isr(uint8_t Channel)
             case(SEND_PID):
                 if (TxBuffRdy){
                     UART_PutChar(Channel, gs_Lin_LinPid);
-                    gs_Lin_stateMachine = IDLE;
+                    if(LIN_MASTER_REQUEST_FRAME == gs_Lin_LinFrameResponse){
+                        gs_Lin_stateMachine = MASTER_RESPONSE;
+                    }
+                    else{
+                        gs_Lin_stateMachine = SLAVE_RESPONSE;
+                    }
+                    
                 }
                 else{
                     /*Do Nothing*/
                 }
                 break;
-            case(SEND_RESPONSE):
+            case(MASTER_RESPONSE):
+                if(gs_Lin_LinFrameDlc == gs_Lin_LinFrameMessageCounter){
+                    gs_Lin_stateMachine = IDLE;
+                }
+                else{
+                    if(TxBuffRdy){
+                        UART_PutChar(Channel, *(gs_Lin_LinFrameData + gs_Lin_LinFrameMessageCounter));
+                        gs_Lin_LinFrameMessageCounter++;
+                    }
+
+                }
+                break;
+            case(SLAVE_RESPONSE):
+                gs_Lin_stateMachine = IDLE;
                 break;
             default:
                 break;

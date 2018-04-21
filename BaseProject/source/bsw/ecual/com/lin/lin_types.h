@@ -48,7 +48,9 @@ typedef enum {
      FIRST_BREAK_BYTE,
      SECOND_BREAK_BYTE,
      SYNC_BYTE,
-     PID_BYTE
+     PID_BYTE,
+     MASTER_RESPONSE,
+     SLAVE_RESPONSE
 }FrameTypes;
 
 #define LIN_MASTER_REQUEST_FRAME   0x3C
