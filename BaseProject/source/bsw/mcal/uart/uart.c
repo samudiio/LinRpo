@@ -47,6 +47,11 @@
 //------------------------------------------------------------------------------
 //         TypeDefs and Defines
 //------------------------------------------------------------------------------
+#define UART_PHYCH0        0
+#define UART_PHYCH1        1
+#define UART_PHYCH2        2
+#define UART_PHYCH3        3
+#define UART_PHYCH4        4
 
 typedef struct
 {
@@ -77,23 +82,24 @@ const UartPeripheralConfig_Type UartCfg =
 };
 
 /*------------------------------------------------------------------------------
- *         Exported functions
+ *         Local functions
  *----------------------------------------------------------------------------*/
 
-/**
- *  \brief Handler for UART4.
- *
- *  Process UART4 interrupts
+/*
+ * Brief: Generic UART interrupt service routine
  */
-void UART4_Handler(void)
+void Uart_Isr(uint8_t PhyChannel)
 {
     UartMasks status = 0;
 
-    status = UART_DEFAULT->UART_SR;
+    /*Get Pointer to the UART peripheral to configure.*/
+    UartPtrg = UartCfg.UartBaseAddress[PhyChannel];
+
+    status = UartPtrg->UART_SR;
 
     if(status & UART_MASK_RXRDY)
     {
-        printf("%c", (char)UART_DEFAULT->UART_RHR);
+        printf("%c", (char)UartPtrg->UART_RHR);
     }
     else if((status & UART_MASK_TXRDY) && (!TxBuffRdy))
     {
@@ -102,10 +108,10 @@ void UART4_Handler(void)
         NVIC_DisableIRQ(Uart_IRQIdg);
 
         if (LinFcnPtr){
-            LinFcnPtr(0); //Logical channel
+            LinFcnPtr(PhyChannel);
         }
         else{
-        	/*Do Nothing*/
+            /*Do Nothing*/
         }
     }
     else {
@@ -113,6 +119,13 @@ void UART4_Handler(void)
     }
 }
 
+/*------------------------------------------------------------------------------
+ *         Exported functions
+ *----------------------------------------------------------------------------*/
+
+/*
+ * Brief: Initializes the UART module
+ */
 void Uart_Init(uint8_t PhyChannel, uint32_t Baudrate,  void (*linfunc_ptr)(uint8_t))
 {
     uint8_t *pBuffer = &pTxBuffer[0];
@@ -364,4 +377,51 @@ void UART_ReceiveBuffer(Uart *uart, uint8_t *pBuffer, uint32_t BuffLen)
 void UART_CompareConfig(Uart *uart, uint8_t Val1, uint8_t Val2)
 {
 	uart->UART_CMPR = (UART_CMPR_VAL1(Val1) | UART_CMPR_VAL2(Val2));
+}
+
+/**
+ *  \brief Handler for UART0.
+ *
+ *  Process UART0 interrupts
+ */
+void UART0_Handler(void)
+{
+    Uart_Isr(UART_PHYCH0);
+}
+/**
+ *  \brief Handler for UART1.
+ *
+ *  Process UART1 interrupts
+ */
+void UART1_Handler(void)
+{
+    Uart_Isr(UART_PHYCH1);
+}
+/**
+ *  \brief Handler for UART2.
+ *
+ *  Process UART2 interrupts
+ */
+void UART2_Handler(void)
+{
+    Uart_Isr(UART_PHYCH2);
+}
+/**
+ *  \brief Handler for UART3.
+ *
+ *  Process UART3 interrupts
+ */
+void UART3_Handler(void)
+{
+    Uart_Isr(UART_PHYCH3);
+}
+
+/**
+ *  \brief Handler for UART4.
+ *
+ *  Process UART4 interrupts
+ */
+void UART4_Handler(void)
+{
+    Uart_Isr(UART_PHYCH4);
 }

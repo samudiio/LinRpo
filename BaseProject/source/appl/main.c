@@ -59,11 +59,11 @@ extern int main( void )
     SCB_EnableICache();
     SCB_EnableDCache();
 
-    printf( "Configure LED PIOs.\n\r" ) ;
+    //printf( "Configure LED PIOs.\n\r" ) ;
     _ConfigureLeds() ;
   
     MemAllocInit();
-    printf( "\n\r-- Memory Allocation Initialized!!! --\n\r" ) ;
+    //printf( "\n\r-- Memory Allocation Initialized!!! --\n\r" ) ;
   
 
     /*MCAN_InitTxQueue(loc_mcan_Config);
@@ -75,6 +75,7 @@ extern int main( void )
     vfnScheduler_Start();
 
     Lin_Init(LIN_Config);
+    printf( "\n\r-- LIN Driver Initialized!!! --\n\r" ) ;
 
     /*-- Loop through all the periodic tasks from Task Scheduler --*/
     for(;;)

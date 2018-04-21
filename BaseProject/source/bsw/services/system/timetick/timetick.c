@@ -102,7 +102,7 @@ uint32_t TimeTick_Configure( void (*func_ptr)(void) )
 	uint32_t Pck;
 	_dwTickCount = 0 ;
 
-	TRACE_INFO( "Configure system tick to get 500us tick period.\n\r" ) ;
+	//TRACE_INFO( "Configure system tick to get 500us tick period.\n\r" ) ;
 	/* check if there is MDIV value */
 	Mdiv_Val = ( (PMC->PMC_MCKR & PMC_MCKR_MDIV_Msk) >> PMC_MCKR_MDIV_Pos);
 

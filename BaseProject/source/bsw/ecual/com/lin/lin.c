@@ -138,7 +138,7 @@ void Lin_Isr(uint8_t Channel)
 
         case(SEND_BREAK):
             if ((gs_Lin_ByteCounter == SECOND_BREAK_BYTE) && (TxBuffRdy)){
-                UART_PutChar(LinLogicaltoPhysicalCh[Channel], 0x00);
+                UART_PutChar(Channel, 0x00);
                 gs_Lin_ByteCounter = FIRST_BREAK_BYTE;
                 /* Change State to SYNC Bytes*/
                 gs_Lin_stateMachine = SEND_SYNC;
@@ -149,7 +149,7 @@ void Lin_Isr(uint8_t Channel)
                 break;
             case(SEND_SYNC):
                 if (TxBuffRdy){
-                    UART_PutChar(LinLogicaltoPhysicalCh[Channel], 0x55);
+                    UART_PutChar(Channel, 0x55);
                     gs_Lin_stateMachine = SEND_PID;
                 }
                 else{
@@ -158,7 +158,7 @@ void Lin_Isr(uint8_t Channel)
                 break;
             case(SEND_PID):
                 if (TxBuffRdy){
-                    UART_PutChar(LinLogicaltoPhysicalCh[Channel], gs_Lin_LinPid);
+                    UART_PutChar(Channel, gs_Lin_LinPid);
                     gs_Lin_stateMachine = IDLE;
                 }
                 else{
