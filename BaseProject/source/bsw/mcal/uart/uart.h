@@ -54,7 +54,7 @@ typedef enum
     UART_MASK_TXEMPTY   = 512
 }UartMasks;
 
-typedef void (*LINFuncPtr)(void);
+typedef void (*LINFuncPtr)(uint8_t);
 
 //------------------------------------------------------------------------------
 //         Global variables
@@ -65,7 +65,7 @@ extern uint8_t TxBuffRdy;
 //         Global functions
 //------------------------------------------------------------------------------
 
-void Uart_Init(uint8_t PhyChannel, uint32_t Baudrate,  void (*linfunc_ptr)(void));
+void Uart_Init(uint8_t PhyChannel, uint32_t Baudrate,  void (*linfunc_ptr)(uint8_t));
 
 void UART_UpdateBaudRate(uint8_t PhyChannel, uint32_t Baudrate);
 
@@ -76,7 +76,7 @@ void UART_SetTransmitterEnabled(Uart *uart, uint8_t enabled);
 
 void UART_SetReceiverEnabled(Uart *uart, uint8_t enabled);
 
-void UART_PutChar( Uart *uart, uint8_t c);
+void UART_PutChar(uint8_t PhyChannel, uint8_t c);
 
 uint32_t UART_IsRxReady(Uart *uart);
 
@@ -90,7 +90,7 @@ void UART_DisableIt(Uart *uart,uint32_t mode);
 
 uint32_t UART_GetItMask(Uart *uart);
 
-void UART_SendBuffer(Uart *uart, uint8_t *pBuffer, uint32_t BuffLen);
+void UART_SendBuffer(uint8_t PhyChannel, uint8_t *pBuffer, uint32_t BuffLen);
 
 void UART_ReceiveBuffer(Uart *uart, uint8_t *pBuffer, uint32_t BuffLen);
 

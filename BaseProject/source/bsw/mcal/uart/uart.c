@@ -102,7 +102,7 @@ void UART4_Handler(void)
         NVIC_DisableIRQ(Uart_IRQIdg);
 
         if (LinFcnPtr){
-            LinFcnPtr();
+            LinFcnPtr(0); //Logical channel
         }
         else{
         	/*Do Nothing*/
@@ -113,7 +113,7 @@ void UART4_Handler(void)
     }
 }
 
-void Uart_Init(uint8_t PhyChannel, uint32_t Baudrate,  void (*linfunc_ptr)(void))
+void Uart_Init(uint8_t PhyChannel, uint32_t Baudrate,  void (*linfunc_ptr)(uint8_t))
 {
     uint8_t *pBuffer = &pTxBuffer[0];
     uint32_t UartPeriphId;
@@ -154,19 +154,17 @@ void Uart_Init(uint8_t PhyChannel, uint32_t Baudrate,  void (*linfunc_ptr)(void)
  */
 void UART_UpdateBaudRate(uint8_t PhyChannel, uint32_t Baudrate)
 {
-    Uart *UartPtr;
-
     /*Get Pointer to the UART peripheral to configure.*/
-    UartPtr = UartCfg.UartBaseAddress[PhyChannel];
+    UartPtrg = UartCfg.UartBaseAddress[PhyChannel];
 
     /* Reset and disable receiver & transmitter*/
-    UartPtr->UART_CR = UART_CR_RSTRX | UART_CR_RSTTX
+    UartPtrg->UART_CR = UART_CR_RSTRX | UART_CR_RSTTX
             | UART_CR_RXDIS | UART_CR_TXDIS | UART_CR_RSTSTA;
 
     /* Configure baudrate*/
-    UartPtr->UART_BRGR = (BOARD_MCK / Baudrate) / 16;
+    UartPtrg->UART_BRGR = (BOARD_MCK / Baudrate) / 16;
 
-    UartPtr->UART_CR = UART_CR_TXEN | UART_CR_RXEN;
+    UartPtrg->UART_CR = UART_CR_TXEN | UART_CR_RXEN;
 }
 
 /**
@@ -279,8 +277,11 @@ static uint32_t UART_IsTxSent(Uart *uart)
  * \param uart  Pointer to an UART peripheral.
  * \param c  Character to send
  */
-void UART_PutChar( Uart *uart, uint8_t c)
+void UART_PutChar(uint8_t PhyChannel, uint8_t c)
 {
+    /*Get Pointer to the UART peripheral to configure.*/
+    UartPtrg = UartCfg.UartBaseAddress[PhyChannel];
+
 	/* Wait for the transmitter to be ready*/
 	//while (!UART_IsRxReady(uart) && !UART_IsTxSent(uart));
 
@@ -288,7 +289,7 @@ void UART_PutChar( Uart *uart, uint8_t c)
     {
         TxBuffRdy = 0;
         /* Send character*/
-        uart->UART_THR = c;
+        UartPtrg->UART_THR = c;
         NVIC_EnableIRQ(Uart_IRQIdg);
     }
     else{
@@ -339,13 +340,13 @@ uint32_t UART_GetItMask(Uart *uart)
 	return uart->UART_IMR;
 }
 
-void UART_SendBuffer(Uart *uart, uint8_t *pBuffer, uint32_t BuffLen)
+void UART_SendBuffer(uint8_t PhyChannel, uint8_t *pBuffer, uint32_t BuffLen)
 {
 	uint8_t *pData = pBuffer;
 	uint32_t Len =0;
 
 	for(Len =0; Len<BuffLen; Len++ ) {
-		UART_PutChar(uart, *pData);
+		UART_PutChar(PhyChannel, *pData);
 		pData++;
 	}
 }

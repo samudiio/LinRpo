@@ -45,7 +45,7 @@ Std_ReturnType Lin_SendFrame (uint8_t Channel, LinPduType* PduInfoPtr);
 Std_ReturnType Lin_GetSlaveResponse (uint8_t Channel, uint8_t** LinSduPtr);
 
 /* Function prototype to manipulate interruptions on the TX*/
-void Lin_Isr(void);
+void Lin_Isr(uint8_t Channel);
 
 
 

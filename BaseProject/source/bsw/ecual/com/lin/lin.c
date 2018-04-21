@@ -108,7 +108,7 @@ void Lin_Init (const LinConfig_T *Config)
      {
          if((gs_Lin_ByteCounter == FIRST_BREAK_BYTE) && (TxBuffRdy)){
              gs_Lin_stateMachine = SEND_BREAK;
-             UART_PutChar(UART4, 0x00);
+             UART_PutChar(LinLogicaltoPhysicalCh[Channel], 0x00);
              UART_UpdateBaudRate(LinLogicaltoPhysicalCh[Channel], BAUDRATE_UPD);
              gs_Lin_ByteCounter = SECOND_BREAK_BYTE;
          }
@@ -128,7 +128,7 @@ void Lin_Init (const LinConfig_T *Config)
  }
 
 /* Lin_Isr: LIN callback function for UART Interrupt also implement the StateMachine*/
-void Lin_Isr(void)
+void Lin_Isr(uint8_t Channel)
 {
     switch(gs_Lin_stateMachine)
     {
@@ -138,7 +138,7 @@ void Lin_Isr(void)
 
         case(SEND_BREAK):
             if ((gs_Lin_ByteCounter == SECOND_BREAK_BYTE) && (TxBuffRdy)){
-                UART_PutChar(UART4, 0x00);
+                UART_PutChar(LinLogicaltoPhysicalCh[Channel], 0x00);
                 gs_Lin_ByteCounter = FIRST_BREAK_BYTE;
                 /* Change State to SYNC Bytes*/
                 gs_Lin_stateMachine = SEND_SYNC;
@@ -149,7 +149,7 @@ void Lin_Isr(void)
                 break;
             case(SEND_SYNC):
                 if (TxBuffRdy){
-                    UART_PutChar(UART4, 0x55);
+                    UART_PutChar(LinLogicaltoPhysicalCh[Channel], 0x55);
                     gs_Lin_stateMachine = SEND_PID;
                 }
                 else{
@@ -158,7 +158,7 @@ void Lin_Isr(void)
                 break;
             case(SEND_PID):
                 if (TxBuffRdy){
-                    UART_PutChar(UART4,gs_Lin_LinPid);
+                    UART_PutChar(LinLogicaltoPhysicalCh[Channel], gs_Lin_LinPid);
                     gs_Lin_stateMachine = IDLE;
                 }
                 else{
