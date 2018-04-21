@@ -51,6 +51,8 @@ typedef enum {
      PID_BYTE
 }FrameTypes;
 
+#define LIN_MASTER_REQUEST_FRAME   0x3C
+#define LIN_SLAVE_RESPONSE_FRAME   0x3D
 
 /*Description: The LIN identifier (0..0x3F) along with its two parity bits*/
 typedef uint8_t LinFramePidType;
@@ -64,8 +66,8 @@ typedef enum {
 
 /* Specifies whether the frame processor is required to transmit the response part of the LIN fram*/
 typedef enum {
-    LIN_MASTER_RESPONSE,
-    LIN_SLAVE_RESPONSE
+    LIN_MASTER_RESPONSE,    //Response is generated from this node (master)
+    LIN_SLAVE_RESPONSE      //Response is generated from a remote slave node
 }LinFrameResponseType;
 
 /*Specifies the number of SDU of data bytes to copy*/
