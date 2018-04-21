@@ -53,7 +53,7 @@ typedef struct
 const LinConfig_T *gLinConfigPtr;    /*Gobal Pointer to Lin configuration*/
 const LinStatusType *gLinStatusPtr;
 
-uint8_t LinPhysicaltoLogicalCh[UART_MAX_CH];
+uint8_t LinLogicaltoPhysicalCh[UART_MAX_CH];
 
  static uint8_t gs_Lin_stateMachine;
  static uint8_t gs_Lin_ByteCounter;
@@ -92,7 +92,7 @@ void Lin_Init (const LinConfig_T *Config)
         LinBaudrate = Lin_LogChannel.LinChannelBaudrate;
 
         /*Map corresponding channels*/
-        LinPhysicaltoLogicalCh[PhyChannel] = Lin_Idx;
+        LinLogicaltoPhysicalCh[Lin_Idx] = PhyChannel;
 
         /*Initialitate UART module*/
         Uart_Init(PhyChannel, LinBaudrate, Lin_Isr);
@@ -109,7 +109,7 @@ void Lin_Init (const LinConfig_T *Config)
          if((gs_Lin_ByteCounter == FIRST_BREAK_BYTE) && (TxBuffRdy)){
              gs_Lin_stateMachine = SEND_BREAK;
              UART_PutChar(UART4, 0x00);
-             UART_UpdateBaudRate(BAUDRATE_UPD);
+             UART_UpdateBaudRate(LinLogicaltoPhysicalCh[Channel], BAUDRATE_UPD);
              gs_Lin_ByteCounter = SECOND_BREAK_BYTE;
          }
          else{

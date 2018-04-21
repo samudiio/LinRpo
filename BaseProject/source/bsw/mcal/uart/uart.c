@@ -149,19 +149,24 @@ void Uart_Init(uint8_t PhyChannel, uint32_t Baudrate,  void (*linfunc_ptr)(void)
     NVIC_EnableIRQ(Uart_IRQIdg);
 }
 
-/*Todo
- *  Verify how to handle diferent channel requests when call this function.
+/*
+ *  Function to update baudrate
  */
-void UART_UpdateBaudRate(uint32_t Baudrate)
+void UART_UpdateBaudRate(uint8_t PhyChannel, uint32_t Baudrate)
 {
+    Uart *UartPtr;
+
+    /*Get Pointer to the UART peripheral to configure.*/
+    UartPtr = UartCfg.UartBaseAddress[PhyChannel];
+
     /* Reset and disable receiver & transmitter*/
-    UartPtrg->UART_CR = UART_CR_RSTRX | UART_CR_RSTTX
+    UartPtr->UART_CR = UART_CR_RSTRX | UART_CR_RSTTX
             | UART_CR_RXDIS | UART_CR_TXDIS | UART_CR_RSTSTA;
 
     /* Configure baudrate*/
-    UartPtrg->UART_BRGR = (BOARD_MCK / Baudrate) / 16;
+    UartPtr->UART_BRGR = (BOARD_MCK / Baudrate) / 16;
 
-    UartPtrg->UART_CR = UART_CR_TXEN | UART_CR_RXEN;
+    UartPtr->UART_CR = UART_CR_TXEN | UART_CR_RXEN;
 }
 
 /**

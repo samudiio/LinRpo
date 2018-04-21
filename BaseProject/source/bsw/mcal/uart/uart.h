@@ -67,7 +67,7 @@ extern uint8_t TxBuffRdy;
 
 void Uart_Init(uint8_t PhyChannel, uint32_t Baudrate,  void (*linfunc_ptr)(void));
 
-void UART_UpdateBaudRate(uint32_t Baudrate);
+void UART_UpdateBaudRate(uint8_t PhyChannel, uint32_t Baudrate);
 
 void UART_Configure(Uart *uart, uint32_t mode, uint32_t baudrate, 
 		uint32_t masterClock);
