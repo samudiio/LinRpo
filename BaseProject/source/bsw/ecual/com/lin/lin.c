@@ -54,15 +54,16 @@ const LinConfig_T *gLinConfigPtr;    /*Gobal Pointer to Lin configuration*/
 const LinStatusType *gLinStatusPtr;
 
 uint8_t LinLogicaltoPhysicalCh[UART_MAX_CH];
+uint8_t LinPhysicaltoLogicalCh[UART_MAX_CH];
 
  static uint8_t gs_Lin_stateMachine;
  static uint8_t gs_Lin_ByteCounter;
- static uint8_t gs_Lin_LinPid;
- static uint8_t gs_Lin_LinFrameResponse;
- static uint8_t gs_Lin_LinFrameDlc;
- static uint8_t gs_Lin_LinFrameMessageCounter;
+ static uint8_t gs_Lin_Pid;
+ static uint8_t gs_Lin_FrameResponse;
+ static uint8_t gs_Lin_FrameDl;
+ static uint8_t gs_Lin_FrameMessageCounter;
 
- static uint8_t *gs_Lin_LinFrameData;
+ static uint8_t *gs_Lin_FrameData;
 
  uint8_t TxBuffRdy;
 
@@ -98,6 +99,7 @@ void Lin_Init (const LinConfig_T *Config)
 
         /*Map corresponding channels*/
         LinLogicaltoPhysicalCh[Lin_Idx] = PhyChannel;
+        LinPhysicaltoLogicalCh[PhyChannel] = Lin_Idx;
 
         /*Initialitate UART module*/
         Uart_Init(PhyChannel, LinBaudrate, Lin_Isr);
@@ -107,10 +109,12 @@ void Lin_Init (const LinConfig_T *Config)
 /* Lin_SendFrame: LIN function that send the frame every 10ms*/
  Std_ReturnType Lin_SendFrame (uint8_t Channel, LinPduType* PduInfoPtr)
  {
-     gs_Lin_LinPid              = PduInfoPtr->Pid;
-     gs_Lin_LinFrameResponse    = PduInfoPtr->Drc;
-     gs_Lin_LinFrameDlc         = PduInfoPtr->Dl;
-     gs_Lin_LinFrameData        = PduInfoPtr->SduPtr;
+     uint8_t RetVal = E_NOT_OK;
+
+     gs_Lin_Pid              = PduInfoPtr->Pid;
+     gs_Lin_FrameResponse    = PduInfoPtr->Drc;
+     gs_Lin_FrameDl         = PduInfoPtr->Dl;
+     gs_Lin_FrameData        = PduInfoPtr->SduPtr;
 
      if(IDLE == gs_Lin_stateMachine)
      {
@@ -119,6 +123,7 @@ void Lin_Init (const LinConfig_T *Config)
              UART_PutChar(LinLogicaltoPhysicalCh[Channel], 0x00);
              UART_UpdateBaudRate(LinLogicaltoPhysicalCh[Channel], BAUDRATE_UPD);
              gs_Lin_ByteCounter = SECOND_BREAK_BYTE;
+             RetVal = E_OK;
          }
          else{
             /*Do Nothing*/
@@ -127,12 +132,19 @@ void Lin_Init (const LinConfig_T *Config)
      else{
          /*Do Nothing*/
      }
-    return 0;
+    return RetVal;
  }
 
  Std_ReturnType Lin_GetSlaveResponse ( uint8_t Channel, uint8_t** LinSduPtr )
  {
-     return 0;
+     uint8_t LogChannel;
+     uint8_t RetVal = E_NOT_OK;
+
+     LogChannel = LinPhysicaltoLogicalCh[Channel];
+
+     //Todo receive response.
+
+     return RetVal;
  }
 
 /* Lin_Isr: LIN callback function for UART Interrupt also implement the StateMachine*/
@@ -166,8 +178,8 @@ void Lin_Isr(uint8_t Channel)
                 break;
             case(SEND_PID):
                 if (TxBuffRdy){
-                    UART_PutChar(Channel, gs_Lin_LinPid);
-                    if(LIN_MASTER_REQUEST_FRAME == gs_Lin_LinFrameResponse){
+                    UART_PutChar(Channel, gs_Lin_Pid);
+                    if(LIN_MASTER_REQUEST_FRAME == gs_Lin_FrameResponse){
                         gs_Lin_stateMachine = MASTER_RESPONSE;
                     }
                     else{
@@ -180,13 +192,13 @@ void Lin_Isr(uint8_t Channel)
                 }
                 break;
             case(MASTER_RESPONSE):
-                if(gs_Lin_LinFrameDlc == gs_Lin_LinFrameMessageCounter){
+                if(gs_Lin_FrameDl == gs_Lin_FrameMessageCounter){
                     gs_Lin_stateMachine = IDLE;
                 }
                 else{
                     if(TxBuffRdy){
-                        UART_PutChar(Channel, *(gs_Lin_LinFrameData + gs_Lin_LinFrameMessageCounter));
-                        gs_Lin_LinFrameMessageCounter++;
+                        UART_PutChar(Channel, *(gs_Lin_FrameData + gs_Lin_FrameMessageCounter));
+                        gs_Lin_FrameMessageCounter++;
                     }
 
                 }

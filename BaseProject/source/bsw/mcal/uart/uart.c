@@ -99,7 +99,10 @@ void Uart_Isr(uint8_t PhyChannel)
 
     if(status & UART_MASK_RXRDY)
     {
-        printf("%c", (char)UartPtrg->UART_RHR);
+        //printf("%c", (char)UartPtrg->UART_RHR);
+        //Lin_GetSlaveResponse(PhyChannel, );
+
+        NVIC_EnableIRQ(Uart_IRQIdg);
     }
     else if((status & UART_MASK_TXRDY) && (!TxBuffRdy))
     {
